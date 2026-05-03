@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: khelder-backend
+
+  datasource:
+    url:               ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/khelder_db}
+    username:          ${SPRING_DATASOURCE_USERNAME:khelder_user}
+    password:          ${SPRING_DATASOURCE_PASSWORD:khelder_pass}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: 8080
+
+jwt:
+  secret:     ${JWT_SECRET:khelder_jwt_secret_key_development_only_32chars}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+logging:
+  level:
+    com.khelder:                  DEBUG
+    org.springframework.security: DEBUG
