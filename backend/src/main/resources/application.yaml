@@ -1,6 +1,7 @@
 spring:
   application:
     name: khelder-backend
+    
 
   datasource:
     url:               ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/khelder_db}
@@ -8,11 +9,17 @@ spring:
     password:          ${SPRING_DATASOURCE_PASSWORD:khelder_pass}
     driver-class-name: org.postgresql.Driver
 
+  sql:
+      init:
+        mode: always
+        data-locations: classpath:data.sql
+        
   jpa:
     open-in-view: false
     hibernate:
       ddl-auto: update
     show-sql: true
+    defer-datasource-initialization: true  # importante: ejecuta data.sql DESPUÉS de que Hibernate crea las tablas
     properties:
       hibernate:
         format_sql: true
