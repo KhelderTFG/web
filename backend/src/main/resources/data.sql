@@ -27,14 +27,14 @@ INSERT INTO caregiver (caregiver_id, name, email, password, phone) VALUES
     '536e686c-7f3a-4469-80e9-383750059361',
     'Carlos Martínez',
     'carlos@khelder.com',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LPVNEJbEUTu',
+    '$2a$10$uU7l2VxL11msFaegHAU0feMR/p16jYjLAU1dpX6PEczzuLwZTfMvq',
     '600111222'
 ),
 (
     '9f7e7747-0744-4860-9975-d5e855c4d516',
     'Ana López',
     'ana@khelder.com',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LPVNEJbEUTu',
+    '$2a$10$uU7l2VxL11msFaegHAU0feMR/p16jYjLAU1dpX6PEczzuLwZTfMvq',
     '600333444'
 );
 
