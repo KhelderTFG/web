@@ -39,4 +39,4 @@ jwt:
 logging:
   level:
     com.khelder:                  DEBUG
-    org.springframework.security: DEBUG
+    org.springframework.security: TRACE

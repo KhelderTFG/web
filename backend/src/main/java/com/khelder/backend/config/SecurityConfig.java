@@ -36,32 +36,17 @@ public class SecurityConfig {
             throws Exception {
 
         http
-            // Deshabilitar CSRF — usamos JWT stateless
             .csrf(AbstractHttpConfigurer::disable)
-
-            // Configuración CORS para el frontend React
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-            // Rutas públicas y protegidas
             .authorizeHttpRequests(auth -> auth
-                // Rutas públicas — no requieren token
-                .requestMatchers(
-                    "/api/v1/auth/**",
-                    "/actuator/health"
-                ).permitAll()
-                // El resto de rutas requieren autenticación
+                .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                 .anyRequest().authenticated()
             )
-
-            // Sin sesión
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-
-            // Proveedor de autenticación
-            .authenticationProvider(authenticationProvider())
-
-            // Filtro JWT antes del filtro estándar de Spring Security
+            // Clave: no usar authenticationProvider() aquí
+            // Se configura a través del AuthenticationManager
             .addFilterBefore(
                 jwtAuthFilter,
                 UsernamePasswordAuthenticationFilter.class
@@ -74,8 +59,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-            "http://localhost:3000",    // React dev server
-            "http://localhost:5173"     // Vite dev server
+            "http://localhost:3000",
+            "http://localhost:5173"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
