@@ -1,5 +1,7 @@
 @baseUrl = http://localhost:8080
-@token = {{$dotenv token}}
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjYXJsb3NAa2hlbGRlci5jb20iLCJpYXQiOjE3Nzc5MjcwNDQsImV4cCI6MTc3ODAxMzQ0NH0.0TgjcbzAbRgklrI6DMrkEi82GmT9lo6nQ3mDZEx3Pgs
+@patientMariaId = 7928e23f-e89a-4f51-87a3-535316335f60
+@deviceMariaId  = b1689531-158a-4d74-9721-a75908906560
 
 ### RF-03: Enviar registro biométrico
 POST {{baseUrl}}/api/v1/biometric-records
@@ -7,7 +9,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "device_id": "watch-maria-001",
+  "device_id": "{{deviceMariaId}}",
   "heart_rate": 75.5,
   "spo2": 98.0,
   "steps": 1200,
@@ -17,15 +19,18 @@ Authorization: Bearer {{token}}
 
 ###
 
-### RF-03: Enviar FC crítica (debe generar alerta automática)
-POST {{baseUrl}}/api/v1/biometric-records
-Content-Type: application/json
+### RF-11: Historial de María — última semana
+GET {{baseUrl}}/api/v1/biometric-records/patient/{{patientMariaId}}?from=2026-01-01T00:00:00&to=2026-12-31T23:59:59&page=0&size=10
 Authorization: Bearer {{token}}
 
-{
-  "device_id": "watch-maria-001",
-  "heart_rate": 155.0,
-  "spo2": 95.0,
-  "steps": 500,
-  "timestamp": 1714900000000
-}
+###
+
+### RF-11: Últimas 10 mediciones del smartwatch de María
+GET {{baseUrl}}/api/v1/biometric-records/device/{{deviceMariaId}}/recent
+Authorization: Bearer {{token}}
+
+###
+
+### RF-11: Última medición del smartwatch de María
+GET {{baseUrl}}/api/v1/biometric-records/device/{{deviceMariaId}}/latest
+Authorization: Bearer {{token}}
