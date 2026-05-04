@@ -51,4 +51,7 @@ public interface ReminderRepository extends JpaRepository<Reminder, UUID> {
         @Param("from")      LocalDateTime from,
         @Param("to")        LocalDateTime to
     );
+
+    List<Reminder> findByCaregiverCaregiverIdOrderByScheduledDateAsc(UUID caregiverId);
+
 }
