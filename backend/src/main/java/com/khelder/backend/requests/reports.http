@@ -1,0 +1,13 @@
+@baseUrl = http://localhost:8080
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjYXJsb3NAa2hlbGRlci5jb20iLCJpYXQiOjE3Nzc5MjkwMDQsImV4cCI6MTc3ODAxNTQwNH0.FygsUcBudYvzAnCE30e-eE364RuJhz-SkTobhtrAHNM
+@patientMariaId = 7928e23f-e89a-4f51-87a3-535316335f60
+
+### RF-16: Descargar informe PDF de María
+GET {{baseUrl}}/api/v1/reports/{{patientMariaId}}?from=2026-01-01T00:00:00&to=2026-12-31T23:59:59&format=pdf
+Authorization: Bearer {{token}}
+
+###
+
+### RF-16: Descargar informe CSV de María
+GET {{baseUrl}}/api/v1/reports/{{patientMariaId}}?from=2026-01-01T00:00:00&to=2026-12-31T23:59:59&format=csv
+Authorization: Bearer {{token}}
