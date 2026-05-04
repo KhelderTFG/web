@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Khelder WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #00ff88; }
+        #log { border: 1px solid #00ff88; padding: 10px; height: 400px; overflow-y: auto; }
+        button { background: #1a8c7a; color: white; border: none; padding: 8px 16px;
+                 margin: 4px; cursor: pointer; border-radius: 4px; }
+        input { background: #333; color: white; border: 1px solid #555;
+                padding: 6px; border-radius: 4px; width: 400px; }
+    </style>
+</head>
+<body>
+    <h2>🔔 Khelder WebSocket Test</h2>
+
+    <div>
+        <input id="caregiverId" placeholder="UUID del cuidador (opcional)" />
+        <button onclick="connect()">Conectar</button>
+        <button onclick="disconnect()">Desconectar</button>
+    </div>
+
+    <br>
+    <div id="log"></div>
+
+    <script>
+        let stompClient = null;
+
+        function log(msg, color = '#00ff88') {
+            const div = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            div.innerHTML += `<div style="color:${color}">[${time}] ${msg}</div>`;
+            div.scrollTop = div.scrollHeight;
+        }
+
+        function connect() {
+            const socket = new SockJS('http://localhost:8080/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.debug = null; // Silenciar logs de STOMP
+
+            stompClient.connect({}, function (frame) {
+                log('✅ Conectado al servidor WebSocket');
+
+                // Suscribirse al topic general de alertas
+                stompClient.subscribe('/topic/alerts', function (message) {
+                    const alert = JSON.parse(message.body);
+                    log(`🚨 ALERTA: ${alert.alert_type} — ${alert.patient_name}
+                         (${alert.device_id})`, '#ff4444');
+                    log(JSON.stringify(alert, null, 2), '#ffaa00');
+                });
+
+                // Suscribirse al topic de conexión
+                stompClient.subscribe('/topic/connection', function (message) {
+                    const status = JSON.parse(message.body);
+                    log(`📡 CONEXIÓN: ${status.device_id} → 
+                         ${status.connected ? '🟢 conectado' : '🔴 desconectado'}`,
+                         '#44aaff');
+                });
+
+                // Suscribirse al topic específico del cuidador si se especificó
+                const caregiverId = document.getElementById('caregiverId').value;
+                if (caregiverId) {
+                    stompClient.subscribe(
+                        `/topic/alerts/${caregiverId}`,
+                        function (message) {
+                            const alert = JSON.parse(message.body);
+                            log(`🔔 ALERTA PERSONAL: ${alert.alert_type}`, '#ff88ff');
+                        }
+                    );
+                    log(`📋 Suscrito al topic /topic/alerts/${caregiverId}`);
+                }
+
+            }, function (error) {
+                log(`❌ Error de conexión: ${error}`, '#ff4444');
+            });
+        }
+
+        function disconnect() {
+            if (stompClient) {
+                stompClient.disconnect();
+                log('🔌 Desconectado');
+            }
+        }
+    </script>
+</body>
+</html>

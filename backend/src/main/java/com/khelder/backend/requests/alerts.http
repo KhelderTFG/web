@@ -8,7 +8,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "device_id": "TU_DEVICE_ID_MARIA",
+  "device_id": "b1689531-158a-4d74-9721-a75908906560",
   "alert_type": "SOS_MANUAL",
   "latitude": 37.3891,
   "longitude": -5.9845,

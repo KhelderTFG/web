@@ -30,6 +30,7 @@ public class AlertService {
     private final AlertRepository      alertRepository;
     private final SmartwatchRepository smartwatchRepository;
     private final CaregiverRepository  caregiverRepository;
+    private final WebSocketNotificationService webSocketNotificationService;
 
     // -------------------------------------------------------------------------
     // RF-01, RF-02, RF-13: Recibir alerta desde el móvil
@@ -64,9 +65,9 @@ public class AlertService {
         log.warn("Alerta {} guardada para dispositivo {}",
                 request.getAlertType(), request.getDeviceId());
 
-        // TODO Issue #32: notificar al panel web via WebSocket
-
+        webSocketNotificationService.notifyAlert(saved);
         return toResponse(saved);
+
     }
 
     // -------------------------------------------------------------------------
@@ -122,7 +123,7 @@ public class AlertService {
 
         log.info("Alerta {} resuelta", alertId);
 
-        // TODO Issue #32: notificar al panel web via WebSocket
+        webSocketNotificationService.notifyAlert(alert);
 
         return toResponse(alert);
     }
@@ -179,7 +180,7 @@ public class AlertService {
         alertRepository.save(alert);
         log.warn("Alerta {} generada automáticamente: {} bpm", type, heartRate);
 
-        // TODO Issue #32: notificar via WebSocket
+        webSocketNotificationService.notifyAlert(alert);
     }
 
     @Transactional
@@ -203,6 +204,7 @@ public class AlertService {
 
         alertRepository.save(alert);
         log.warn("Alerta SPO2_LOW generada: {}%", spO2);
+        webSocketNotificationService.notifyAlert(alert);
     }
 
     // -------------------------------------------------------------------------
@@ -262,36 +264,36 @@ public class AlertService {
                 double latitude,
                 double longitude
         ) {
-        Alert alert = Alert.builder()
-                .deviceId(deviceId)
-                .alertType("GEOFENCE_EXIT")
-                .latitude(latitude)
-                .longitude(longitude)
-                .timestamp(LocalDateTime.now())
-                .status("ACTIVE")
-                .build();
+                Alert alert = Alert.builder()
+                        .deviceId(deviceId)
+                        .alertType("GEOFENCE_EXIT")
+                        .latitude(latitude)
+                        .longitude(longitude)
+                        .timestamp(LocalDateTime.now())
+                        .status("ACTIVE")
+                        .build();
 
-        alertRepository.save(alert);
-        log.warn("Alerta GEOFENCE_EXIT generada para dispositivo {}", deviceId);
+                alertRepository.save(alert);
+                log.warn("Alerta GEOFENCE_EXIT generada para dispositivo {}", deviceId);
 
-        // TODO Issue #32: notificar via WebSocket
+                webSocketNotificationService.notifyAlert(alert);
         }
 
         // Añadir en AlertService.java
         @Transactional
         public void createBatteryAlert(String deviceId, int batteryLevel) {
-        Alert alert = Alert.builder()
-                .deviceId(deviceId)
-                .alertType("BATTERY_LOW")
-                .batteryLevel(batteryLevel)
-                .timestamp(LocalDateTime.now())
-                .status("ACTIVE")
-                .build();
+                Alert alert = Alert.builder()
+                        .deviceId(deviceId)
+                        .alertType("BATTERY_LOW")
+                        .batteryLevel(batteryLevel)
+                        .timestamp(LocalDateTime.now())
+                        .status("ACTIVE")
+                        .build();
 
-        alertRepository.save(alert);
-        log.warn("Alerta BATTERY_LOW generada para dispositivo {}: {}%",
-                deviceId, batteryLevel);
+                alertRepository.save(alert);
+                log.warn("Alerta BATTERY_LOW generada para dispositivo {}: {}%",
+                        deviceId, batteryLevel);
 
-        // TODO Issue #32: notificar via WebSocket
+                webSocketNotificationService.notifyAlert(alert);
         }
 }

@@ -35,6 +35,7 @@ public class SmartwatchService {
     private final GpsLocationRepository gpsLocationRepository;
     private final SafeZoneService       safeZoneService;
     private final AlertService          alertService;
+    private final WebSocketNotificationService webSocketNotificationService;
 
     // Tiempo máximo sin ping antes de considerar desconectado
     private static final int DISCONNECT_THRESHOLD_MINUTES = 10;
@@ -194,7 +195,13 @@ public class SmartwatchService {
                 smartwatchRepository.save(sw);
                 log.warn("Dispositivo marcado como desconectado: {}",
                         sw.getDeviceId());
-                // TODO Issue #32: notificar via WebSocket
+                sw.setConnectionStatus(false);
+                smartwatchRepository.save(sw);
+                webSocketNotificationService.notifyConnectionStatus(
+                        sw.getDeviceId(),
+                        sw.getPatient().getPatientId(),
+                        false
+                );
             }
         });
     }
