@@ -18,7 +18,10 @@
 		<license/>
 	</licenses>
 	<developers>
-		<developer/>
+		<developer>
+			<name>Germán Ojeda Garrido</name>
+			<email>gerojegar@alum.us.es</email>
+		</developer>
 	</developers>
 	<scm>
 		<connection/>
@@ -101,6 +104,20 @@
 		<dependency>
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-spatial</artifactId>
+		</dependency>
+
+		<!-- Apache POI para exportación CSV -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.10.0</version>
+		</dependency>
+
+		<!-- iText para exportación PDF -->
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itextpdf</artifactId>
+			<version>5.5.13.4</version>
 		</dependency>
 	</dependencies>
 
