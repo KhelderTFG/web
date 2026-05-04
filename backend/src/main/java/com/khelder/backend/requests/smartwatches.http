@@ -1,0 +1,52 @@
+@baseUrl = http://localhost:8080
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjYXJsb3NAa2hlbGRlci5jb20iLCJpYXQiOjE3Nzc5MjgyMzcsImV4cCI6MTc3ODAxNDYzN30.awlqgAq8q_x9hxMT54cjk9ZBztC1bN-4NCHUndt-ugY
+@patientMariaId = 7928e23f-e89a-4f51-87a3-535316335f60
+@deviceMariaId  = b1689531-158a-4d74-9721-a75908906560
+
+### RF-15: Registrar smartwatch
+POST {{baseUrl}}/api/v1/smartwatches
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "device_id": "watch-nuevo-001",
+  "patient_id": "{{patientMariaId}}"
+}
+
+###
+
+### RF-15: Actualizar ping con batería y GPS
+PUT {{baseUrl}}/api/v1/smartwatches/{{deviceMariaId}}/ping
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "battery_level": 75,
+  "latitude": 37.3891,
+  "longitude": -5.9845
+}
+
+###
+
+### RF-15: Ping con batería crítica (debe generar alerta)
+PUT {{baseUrl}}/api/v1/smartwatches/{{deviceMariaId}}/ping
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "battery_level": 10,
+  "latitude": 37.3891,
+  "longitude": -5.9845
+}
+
+###
+
+### RF-15: Estado de un dispositivo
+GET {{baseUrl}}/api/v1/smartwatches/{{deviceMariaId}}/status
+Authorization: Bearer {{token}}
+
+###
+
+### RF-15: Estado de todos mis dispositivos
+GET {{baseUrl}}/api/v1/smartwatches
+Authorization: Bearer {{token}}
