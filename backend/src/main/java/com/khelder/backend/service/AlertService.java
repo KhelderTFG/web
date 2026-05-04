@@ -276,4 +276,22 @@ public class AlertService {
 
         // TODO Issue #32: notificar via WebSocket
         }
+
+        // Añadir en AlertService.java
+        @Transactional
+        public void createBatteryAlert(String deviceId, int batteryLevel) {
+        Alert alert = Alert.builder()
+                .deviceId(deviceId)
+                .alertType("BATTERY_LOW")
+                .batteryLevel(batteryLevel)
+                .timestamp(LocalDateTime.now())
+                .status("ACTIVE")
+                .build();
+
+        alertRepository.save(alert);
+        log.warn("Alerta BATTERY_LOW generada para dispositivo {}: {}%",
+                deviceId, batteryLevel);
+
+        // TODO Issue #32: notificar via WebSocket
+        }
 }
