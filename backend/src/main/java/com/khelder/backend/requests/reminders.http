@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:8080
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjYXJsb3NAa2hlbGRlci5jb20iLCJpYXQiOjE3Nzc5MjYzNDgsImV4cCI6MTc3ODAxMjc0OH0.JYetS6eDxZxp4Nmt2-6QoxbzcuaW19c5lma1E0P5vNs
+@patientMariaId = 7928e23f-e89a-4f51-87a3-535316335f60
+
+### RF-10: Listar recordatorios de María
+GET {{baseUrl}}/api/v1/reminders/patient/{{patientMariaId}}
+Authorization: Bearer {{token}}
+
+###
+
+### RF-10: Crear recordatorio
+POST {{baseUrl}}/api/v1/reminders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "patient_id": "{{patientMariaId}}",
+  "message": "Tomar Enalapril 10mg con el desayuno",
+  "scheduled_date": "2026-12-31T09:00:00"
+}
+
+###
+
+### RF-06: Recordatorios pendientes para el smartwatch de María
+GET {{baseUrl}}/api/v1/reminders/pending/TU_DEVICE_ID_MARIA
+Authorization: Bearer {{token}}
+
+###
+
+### RF-06: Confirmar recordatorio
+POST {{baseUrl}}/api/v1/reminders/confirm
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reminder_id": "TU_UUID_RECORDATORIO",
+  "device_id": "TU_DEVICE_ID_MARIA"
+}

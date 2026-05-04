@@ -1,0 +1,50 @@
+@baseUrl = http://localhost:8080
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjYXJsb3NAa2hlbGRlci5jb20iLCJpYXQiOjE3Nzc5MjU4MTksImV4cCI6MTc3ODAxMjIxOX0.4cr42-Ap6_oyd8FIG0bkNrVWvEjASgJD541K0CniBy4
+
+### RF-09: Listar mis pacientes
+GET {{baseUrl}}/api/v1/patients
+Authorization: Bearer {{token}}
+
+###
+
+### RF-09: Detalle de María
+GET {{baseUrl}}/api/v1/patients/11111111-1111-1111-1111-111111111111
+Authorization: Bearer {{token}}
+
+###
+
+### RF-09: Crear paciente
+POST {{baseUrl}}/api/v1/patients
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "full_name": "Antonio Ruiz García",
+  "date_of_birth": "1940-05-20"
+}
+
+###
+
+### RF-09: Actualizar paciente
+PUT {{baseUrl}}/api/v1/patients/11111111-1111-1111-1111-111111111111
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "full_name": "María Antonia García López",
+  "date_of_birth": "1945-03-15"
+}
+
+###
+
+### RF-09: Actualizar historial médico
+PUT {{baseUrl}}/api/v1/patients/11111111-1111-1111-1111-111111111111/medical-history
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "blood_type": "A+",
+  "allergies": "Penicilina, Ibuprofeno",
+  "chronic_conditions": "Hipertensión arterial, Diabetes tipo 2",
+  "emergency_instructions": "Contactar con hijo Carlos: 600111222"
+}

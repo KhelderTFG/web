@@ -1,0 +1,46 @@
+@baseUrl = http://localhost:8080
+@token = {{$dotenv token}}
+
+### RF-01: Alerta SOS manual
+POST {{baseUrl}}/api/v1/alerts
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "device_id": "watch-maria-001",
+  "alert_type": "SOS_MANUAL",
+  "latitude": 37.3891,
+  "longitude": -5.9845,
+  "heart_rate": 88.0,
+  "timestamp": 1714900000000
+}
+
+###
+
+### RF-02: Caída detectada
+POST {{baseUrl}}/api/v1/alerts
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "device_id": "watch-jose-001",
+  "alert_type": "FALL_DETECTED",
+  "latitude": 37.3800,
+  "longitude": -5.9950,
+  "heart_rate": 55.0,
+  "timestamp": 1714900000000
+}
+
+###
+
+### RF-13: Batería crítica
+POST {{baseUrl}}/api/v1/alerts
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "device_id": "watch-carmen-001",
+  "alert_type": "BATTERY_LOW",
+  "battery_level": 12,
+  "timestamp": 1714900000000
+}

@@ -1,0 +1,31 @@
+@baseUrl = http://localhost:8080
+@token = {{$dotenv token}}
+
+### RF-03: Enviar registro biométrico
+POST {{baseUrl}}/api/v1/biometric-records
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "device_id": "watch-maria-001",
+  "heart_rate": 75.5,
+  "spo2": 98.0,
+  "steps": 1200,
+  "temperature": 36.5,
+  "timestamp": 1714900000000
+}
+
+###
+
+### RF-03: Enviar FC crítica (debe generar alerta automática)
+POST {{baseUrl}}/api/v1/biometric-records
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "device_id": "watch-maria-001",
+  "heart_rate": 155.0,
+  "spo2": 95.0,
+  "steps": 500,
+  "timestamp": 1714900000000
+}
