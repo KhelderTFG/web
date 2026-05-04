@@ -244,14 +244,36 @@ public class AlertService {
     // Utilidades
     // -------------------------------------------------------------------------
 
-    private UUID getAuthenticatedCaregiverId() {
-        String email = SecurityContextHolder.getContext()
+        private UUID getAuthenticatedCaregiverId() {
+                String email = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
-        return caregiverRepository.findByEmail(email)
+                return caregiverRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException(
                         "Cuidador autenticado no encontrado"
                 ))
                 .getCaregiverId();
-    }
+        }
+        
+        // Añadir en AlertService.java
+        @Transactional
+        public void createGeofenceAlert(
+                String deviceId,
+                double latitude,
+                double longitude
+        ) {
+        Alert alert = Alert.builder()
+                .deviceId(deviceId)
+                .alertType("GEOFENCE_EXIT")
+                .latitude(latitude)
+                .longitude(longitude)
+                .timestamp(LocalDateTime.now())
+                .status("ACTIVE")
+                .build();
+
+        alertRepository.save(alert);
+        log.warn("Alerta GEOFENCE_EXIT generada para dispositivo {}", deviceId);
+
+        // TODO Issue #32: notificar via WebSocket
+        }
 }

@@ -1,0 +1,42 @@
+@baseUrl = http://localhost:8080
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjYXJsb3NAa2hlbGRlci5jb20iLCJpYXQiOjE3Nzc5Mjc3MTgsImV4cCI6MTc3ODAxNDExOH0.MP4BcAGT2qmtzBHEAuZXBh1RcjYGQmpn9iBCvV2qk6E
+@patientMariaId = 7928e23f-e89a-4f51-87a3-535316335f60
+@deviceMariaId  = b1689531-158a-4d74-9721-a75908906560
+
+### RF-14: Crear zona segura — domicilio de María
+POST {{baseUrl}}/api/v1/safe-zones
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "patient_id": "{{patientMariaId}}",
+  "latitude": 37.3891,
+  "longitude": -5.9845,
+  "radius_meters": 200
+}
+
+###
+
+### RF-14: Zonas seguras de María
+GET {{baseUrl}}/api/v1/safe-zones/patient/{{patientMariaId}}
+Authorization: Bearer {{token}}
+
+###
+
+### RF-14: Verificar si María está dentro de su zona
+### (coordenadas dentro del radio — no debe generar alerta)
+GET {{baseUrl}}/api/v1/safe-zones/check?deviceId={{deviceMariaId}}&lat=37.3891&lon=-5.9845
+Authorization: Bearer {{token}}
+
+###
+
+### RF-14: Verificar si María está fuera de su zona
+### (coordenadas lejos — debe generar alerta GEOFENCE_EXIT)
+GET {{baseUrl}}/api/v1/safe-zones/check?deviceId={{deviceMariaId}}&lat=40.4168&lon=-3.7038
+Authorization: Bearer {{token}}
+
+###
+
+### RF-14: Eliminar zona segura
+DELETE {{baseUrl}}/api/v1/safe-zones/7a46f395-02f3-4147-bc8f-364154fa842c
+Authorization: Bearer {{token}}
