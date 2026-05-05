@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url:               jdbc:h2:mem:khelder_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    username:          sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  sql:
+    init:
+      mode: never   # No cargar data.sql en tests
+
+jwt:
+  secret:     test_secret_key_must_be_at_least_256_bits_long_for_hmac
+  expiration: 86400000
+
+logging:
+  level:
+    com.khelder: WARN
+    org.springframework.security: WARN
