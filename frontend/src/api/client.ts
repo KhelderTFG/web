@@ -1,13 +1,13 @@
+import applyCaseMiddleware from 'axios-case-converter';
 import axios from 'axios';
 
-const client = axios.create({
+const client = applyCaseMiddleware(axios.create({
   baseURL: '/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
-});
+}));
 
-// Interceptor: añadir token JWT a todas las peticiones
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem('khelder_token');
   if (token) {
@@ -16,11 +16,12 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor: redirigir al login si el token ha expirado
 client.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 403 || error.response?.status === 401) {
+    const isAuthRoute = error.config?.url?.includes('/auth/');
+    if (!isAuthRoute &&
+        (error.response?.status === 403 || error.response?.status === 401)) {
       localStorage.removeItem('khelder_token');
       localStorage.removeItem('khelder_caregiver');
       window.location.href = '/login';

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from  './hooks/useAuth';
 import { AuthProvider } from './context/AuthContext';
+import SafeZonePage from './pages/SafeZonePage';
 
 // Páginas (las crearemos en issues siguientes)
 import LoginPage        from './pages/LoginPage';
@@ -37,6 +38,9 @@ const AppRoutes = () => (
     } />
     <Route path="/reports" element={
       <PrivateRoute><ReportsPage /></PrivateRoute>
+    } />
+    <Route path="/safe-zones/:patientId" element={
+      <PrivateRoute><SafeZonePage /></PrivateRoute>
     } />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
