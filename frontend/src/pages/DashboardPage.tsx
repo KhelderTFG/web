@@ -5,7 +5,7 @@ import DeviceStatus   from '../components/dashboard/DeviceStatus';
 import HeartRateChart from '../components/dashboard/HeartRateChart';
 import AlertItem      from '../components/alerts/AlertItem';
 import { useAuth }    from '../hooks/useAuth';
-import { useWebSocket } from '../hooks/useWebSockets';
+import { useWebSocket } from '../hooks/useWebSocket';
 import { patientsApi }  from '../api/patients';
 import { alertsApi }    from '../api/alerts';
 import { biometricApi } from '../api/biometric';
@@ -187,8 +187,8 @@ const DashboardPage = () => {
                 className="mt-3 flex items-center gap-2 text-sm text-[#1A8C7A]
                            hover:text-[#126B5E] font-medium transition-all"
               >
-                <Plus size={16} className="bg-[#1A8C7A] text-white rounded-full" />
-                Añadir zona segura
+                <MapPin size={16} className="text-[#1A8C7A] rounded-full" />
+                Administrar zonas seguras
               </button>
             </div>
 
