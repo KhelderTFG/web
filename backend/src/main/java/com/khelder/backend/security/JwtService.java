@@ -85,4 +85,26 @@ public class JwtService {
                 .getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+    public String generateDeviceToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .claims(new HashMap<>())
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date())
+                // Sin .expiration() → token permanente
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public boolean isDeviceTokenValid(String token) {
+        try {
+            extractUsername(token); // Si no lanza excepción, la firma es válida
+            // Para tokens de dispositivo no hay expiración que comprobar
+            Claims claims = extractAllClaims(token);
+            return claims.getSubject() != null && 
+                claims.getSubject().startsWith("device:");
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

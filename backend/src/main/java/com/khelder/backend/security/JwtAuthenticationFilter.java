@@ -19,35 +19,38 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService            jwtService;
-    private final UserDetailsServiceImpl userDetailsService;
+        private final JwtService            jwtService;
+        private final UserDetailsServiceImpl userDetailsService;
 
-    @Override
-    protected void doFilterInternal(
-            @NonNull HttpServletRequest  request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain         filterChain
-    ) throws ServletException, IOException {
+        @Override
+        protected void doFilterInternal(
+                @NonNull HttpServletRequest  request,
+                @NonNull HttpServletResponse response,
+                @NonNull FilterChain         filterChain
+        ) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
 
-        // Si no hay cabecera Authorization o no empieza por Bearer, pasamos al siguiente filtro sin autenticar
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
+                filterChain.doFilter(request, response);
+                return;
         }
 
-        final String jwt   = authHeader.substring(7);
-        final String email = jwtService.extractUsername(jwt);
+        final String jwt      = authHeader.substring(7);
+        final String username = jwtService.extractUsername(jwt);
 
-        // Solo autenticamos si hay email y no hay autenticación previa
-        if (email != null &&
-            SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (username != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(email);
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(username);
 
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+                // Para dispositivos no validamos contraseña, solo la firma del JWT
+                boolean valid = username.startsWith("device:")
+                        ? jwtService.isDeviceTokenValid(jwt)
+                        : jwtService.isTokenValid(jwt, userDetails);
+
+                if (valid) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -60,9 +63,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
                 SecurityContextHolder.getContext()
                         .setAuthentication(authToken);
-            }
+                }
         }
 
         filterChain.doFilter(request, response);
-    }
+        }
 }
