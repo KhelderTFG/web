@@ -17,9 +17,12 @@ import type {
   BiometricHistoryResponse,
   SafeZoneResponse,
   SmartwatchResponse,
+  VitalsNotification,
 } from '../types';
 import { MapPin, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ConnectionStatus   from '../components/dashboard/ConnectionStatus';
+import { smartwatchesApi } from '../api/smartwatches';
 
 const DashboardPage = () => {
   const { caregiver }  = useAuth();
@@ -34,6 +37,8 @@ const DashboardPage = () => {
     latitude: number; longitude: number
   } | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [devices, setDevices] = useState<SmartwatchResponse[]>([]);
 
   // Cargar pacientes del cuidador
   useEffect(() => {
@@ -97,12 +102,48 @@ const DashboardPage = () => {
 
   }, [selected]);
 
-  // WebSocket — alertas en tiempo real
+  useEffect(() => {
+    const fetchDevices = () => {
+      smartwatchesApi.getMyDevices()
+        .then(({ data }) => setDevices(data))
+        .catch(() => {});
+    };
+
+  fetchDevices();
+    // Refrescar cada 30 segundos
+    const interval = setInterval(fetchDevices, 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleDeviceSelect = (deviceId: string) => {
+    const patient = patients.find(p => p.activeDeviceId === deviceId);
+    if (patient) setSelected(patient);
+  };
+
   const handleNewAlert = useCallback((alert: AlertResponse) => {
-    if (selected && alert.patientId === selected.patientId) {
-      setAlerts((prev) => [alert, ...prev]);
+  // Actualizar contador de alertas en la lista de pacientes
+  setPatients((prev) => prev.map((p) => {
+    if (p.patientId !== alert.patientId) return p;
+    if (alert.status === 'ACTIVE') {
+      return { ...p, activeAlertsCount: p.activeAlertsCount + 1 };
+    } else {
+      return { ...p, activeAlertsCount: Math.max(0, p.activeAlertsCount - 1) };
     }
-  }, [selected]);
+  }));
+
+  // Actualizar alertas del paciente seleccionado
+  if (selected && alert.patientId === selected.patientId) {
+    if (alert.status === 'ACTIVE') {
+      setAlerts((prev) => {
+        const exists = prev.find(a => a.alertId === alert.alertId);
+        if (exists) return prev;
+        return [alert, ...prev];
+      });
+    } else {
+      setAlerts((prev) => prev.filter(a => a.alertId !== alert.alertId));
+    }
+  }
+}, [selected]);
 
   useWebSocket({
     caregiverId: caregiver?.caregiverId ?? '',
@@ -114,16 +155,30 @@ const DashboardPage = () => {
     setAlerts((prev) => prev.filter((a) => a.alertId !== alertId));
   };
 
-  const deviceStatus: SmartwatchResponse | null = selected
-    ? {
-        deviceId:            selected.activeDeviceId ?? '',
-        patientId:           selected.patientId,
-        patientName:         selected.fullName,
-        batteryLevel:        selected.batteryLevel,
-        connectionStatus:    selected.deviceConnected,
-        lastPing:            null,
-        minutesSinceLastPing: null,
-      }
+  const handleNewVitals = useCallback((vitals: VitalsNotification) => {
+    if (selected && vitals.patientId === selected.patientId) {
+      const newRecord: BiometricHistoryResponse = {
+        recordId:    crypto.randomUUID(),
+        deviceId:    vitals.deviceId,
+        heartRate:   vitals.heartRate,
+        spO2:        vitals.spO2,
+        steps:       vitals.steps,
+        temperature: null,
+        timestamp:   vitals.timestamp,
+      };
+      setRecords((prev) => [newRecord, ...prev].slice(0, 10));
+    }
+  }, [selected]);
+
+  useWebSocket({
+    caregiverId: caregiver?.caregiverId ?? '',
+    onAlert:     handleNewAlert,
+    onVitals:    handleNewVitals,
+    enabled:     !!caregiver,
+  });
+
+  const deviceStatus: SmartwatchResponse | null = selected?.activeDeviceId
+    ? devices.find(d => d.deviceId === selected.activeDeviceId) ?? null
     : null;
 
   if (loading) {
@@ -218,6 +273,18 @@ const DashboardPage = () => {
 
           {/* ── Columna derecha ── */}
           <div className="space-y-6">
+
+            <div>
+                <h2 className="text-sm font-semibold text-[#7F8C8D] uppercase
+                              tracking-wide mb-3">
+                  Estado de conexión
+                </h2>
+                <ConnectionStatus
+                  devices={devices}
+                  onSelect={handleDeviceSelect}
+                  selectedId={selected?.activeDeviceId ?? null}
+                />
+            </div>
 
             {/* Estado del dispositivo */}
             <div>
