@@ -143,3 +143,18 @@ export interface Page<T> {
 
 // ---- WebSocket ----
 export type AlertNotification = AlertResponse;
+
+// ---- Pairing ----
+export interface PairingApproveRequest {
+  pairingCode: string;
+  patientId:   string;
+}
+
+export interface VitalsNotification {
+  deviceId:  string;
+  patientId: string;
+  heartRate: number;
+  spO2:      number;
+  steps:     number;
+  timestamp: string;
+}

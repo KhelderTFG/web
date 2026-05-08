@@ -11,6 +11,7 @@ import PatientDetailPage from './pages/PatientDetailPage';
 import AlertsPage       from './pages/AlertsPage';
 import RemindersPage    from './pages/RemindersPage';
 import ReportsPage      from './pages/ReportsPage';
+import SmartWatchPairingPage from './pages/SmartwatchPairingPage';
 
 // Ruta protegida
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -20,7 +21,8 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/login" element={<LoginPage />} />
+    <Route path="/login" element={<LoginPage />
+    } />
     <Route path="/" element={
       <PrivateRoute><DashboardPage /></PrivateRoute>
     } />
@@ -42,7 +44,10 @@ const AppRoutes = () => (
     <Route path="/safe-zones/:patientId" element={
       <PrivateRoute><SafeZonePage /></PrivateRoute>
     } />
-    <Route path="*" element={<Navigate to="/" replace />} />
+    <Route path="*" element={<Navigate to="/" replace />
+    } />
+    <Route path="/pairing" element={<SmartWatchPairingPage />
+    } />
   </Routes>
 );
 
