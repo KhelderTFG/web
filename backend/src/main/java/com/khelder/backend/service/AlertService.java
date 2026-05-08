@@ -36,39 +36,36 @@ public class AlertService {
     // RF-01, RF-02, RF-13: Recibir alerta desde el móvil
     // -------------------------------------------------------------------------
 
-    @Transactional
-    public AlertResponse saveAlert(AlertRequest request) {
+        @Transactional
+        public AlertResponse saveAlert(AlertRequest request) {
+                // Intentar buscar por device_id (UUID) primero, luego por nodeId
+                Smartwatch smartwatch = smartwatchRepository.findById(request.getDeviceId())
+                        .orElseGet(() -> smartwatchRepository.findByNodeId(request.getDeviceId())
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                        "Dispositivo no encontrado: " + request.getDeviceId()
+                                )));
 
-        smartwatchRepository.findById(request.getDeviceId())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Dispositivo no encontrado: " + request.getDeviceId()
-                ));
+                LocalDateTime timestamp = LocalDateTime.ofInstant(
+                        Instant.ofEpochMilli(request.getTimestamp()),
+                        ZoneId.systemDefault()
+                );
 
-        LocalDateTime timestamp = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(request.getTimestamp()),
-                ZoneId.systemDefault()
-        );
+                Alert alert = Alert.builder()
+                        .deviceId(smartwatch.getDeviceId()) // usar el UUID real
+                        .alertType(request.getAlertType())
+                        .latitude(request.getLatitude())
+                        .longitude(request.getLongitude())
+                        .heartRate(request.getHeartRate())
+                        .batteryLevel(request.getBatteryLevel())
+                        .timestamp(timestamp)
+                        .status("ACTIVE")
+                        .build();
 
-        Alert alert = Alert.builder()
-                .deviceId(request.getDeviceId())
-                .alertType(request.getAlertType())
-                .latitude(request.getLatitude())
-                .longitude(request.getLongitude())
-                .heartRate(request.getHeartRate())
-                .batteryLevel(request.getBatteryLevel())
-                .timestamp(timestamp)
-                .status("ACTIVE")
-                .build();
-
-        Alert saved = alertRepository.save(alert);
-
-        log.warn("Alerta {} guardada para dispositivo {}",
-                request.getAlertType(), request.getDeviceId());
-
-        webSocketNotificationService.notifyAlert(saved);
-        return toResponse(saved);
-
-    }
+                Alert saved = alertRepository.save(alert);
+                log.warn("Alerta {} guardada para dispositivo {}", request.getAlertType(), smartwatch.getDeviceId());
+                webSocketNotificationService.notifyAlert(saved);
+                return toResponse(saved);
+        }
 
     // -------------------------------------------------------------------------
     // RF-12: Alertas activas de todos los pacientes del cuidador
