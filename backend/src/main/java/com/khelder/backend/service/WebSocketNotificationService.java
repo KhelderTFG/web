@@ -2,6 +2,7 @@ package com.khelder.backend.service;
 
 import com.khelder.backend.dto.websocket.AlertNotification;
 import com.khelder.backend.entity.Alert;
+import com.khelder.backend.entity.BiometricRecord;
 import com.khelder.backend.entity.Patient;
 import com.khelder.backend.entity.Smartwatch;
 import com.khelder.backend.repository.CaregiverPatientRepository;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import com.khelder.backend.entity.BiometricRecord;
 
 import java.util.UUID;
 
@@ -90,4 +92,30 @@ public class WebSocketNotificationService {
         log.debug("WebSocket: estado de conexión {} → {}",
                 deviceId, connected ? "conectado" : "desconectado");
     }
+
+    public void notifyVitals(BiometricRecord record) {
+        Smartwatch smartwatch = smartwatchRepository
+                .findById(record.getDeviceId())
+                .orElse(null);
+
+        if (smartwatch == null) return;
+
+        Patient patient = smartwatch.getPatient();
+
+        var payload = java.util.Map.of(
+                "device_id",  record.getDeviceId(),
+                "patient_id", patient.getPatientId().toString(),
+                "heart_rate", record.getHeartRate() != null ? record.getHeartRate() : 0,
+                "spo2",       record.getSpO2() != null ? record.getSpO2() : 0,
+                "steps",      record.getSteps() != null ? record.getSteps() : 0,
+                "timestamp",  record.getTimestamp().toString()
+        );
+
+        caregiverPatientRepository
+                .findByIdPatientId(patient.getPatientId())
+                .forEach(cp -> {
+                        String topic = "/topic/vitals/" + cp.getCaregiver().getCaregiverId();
+                        messagingTemplate.convertAndSend(topic, payload);
+                });
+        }
 }
