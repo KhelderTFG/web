@@ -35,14 +35,13 @@ const LoginPage = () => {
 
         {/* Logo y título */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16
-                          rounded-2xl bg-[#1A8C7A] mb-4">
-            <svg viewBox="0 0 24 24" fill="none" className="w-9 h-9 text-white"
-                 stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M4.5 12.5l2 2 3-4 3 4 3-4 2 2" />
-              <rect x="2" y="5" width="20" height="14" rx="2" />
-            </svg>
+          <div className="inline-flex items-center justify-center w-40 h-40
+                          rounded-2xl bg-white shadow-sm mb-4 p-2">
+            <img
+              src="/logo-khelder-2.png"
+              alt="Khelder"
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-3xl font-bold text-[#2C3E50]">Khelder</h1>
           <p className="text-[#7F8C8D] mt-1">
