@@ -33,6 +33,7 @@ public class BiometricRecordService {
     private final PatientRepository         patientRepository;
     private final CaregiverRepository       caregiverRepository;
     private final AlertService              alertService;
+    private final WebSocketNotificationService webSocketNotificationService;
 
     // Umbrales clínicos
     private static final double HR_HIGH_THRESHOLD  = 140.0;
@@ -47,10 +48,11 @@ public class BiometricRecordService {
     public BiometricRecordResponse saveRecord(BiometricRecordRequest request) {
 
         // Verificar que el dispositivo existe
-        smartwatchRepository.findById(request.getDeviceId())
+        Smartwatch smartwatch = smartwatchRepository.findById(request.getDeviceId())
+        .orElseGet(() -> smartwatchRepository.findByNodeId(request.getDeviceId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Dispositivo no encontrado: " + request.getDeviceId()
-                ));
+                )));
 
         // Convertir timestamp Unix a LocalDateTime
         LocalDateTime timestamp = LocalDateTime.ofInstant(
@@ -60,7 +62,7 @@ public class BiometricRecordService {
 
         // Crear y guardar el registro
         BiometricRecord record = BiometricRecord.builder()
-                .deviceId(request.getDeviceId())
+                .deviceId(smartwatch.getDeviceId())
                 .heartRate(request.getHeartRate())
                 .spO2(request.getSpO2())
                 .steps(request.getSteps())
@@ -69,12 +71,13 @@ public class BiometricRecordService {
                 .build();
 
         BiometricRecord saved = biometricRecordRepository.save(record);
+        webSocketNotificationService.notifyVitals(saved);
 
         // Actualizar último ping del smartwatch
         smartwatchRepository.updatePing(
-                request.getDeviceId(),
+                smartwatch.getDeviceId(),
                 LocalDateTime.now(),
-                null
+                request.getBatteryLevel()
         );
 
         // Evaluar umbrales clínicos

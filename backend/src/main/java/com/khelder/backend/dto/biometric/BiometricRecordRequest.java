@@ -14,6 +14,7 @@ public class BiometricRecordRequest {
     private Double spO2;
     private Long   steps;
     private Double temperature;
+    private Integer batteryLevel;
 
     @NotNull(message = "El timestamp es obligatorio")
     private Long timestamp;
