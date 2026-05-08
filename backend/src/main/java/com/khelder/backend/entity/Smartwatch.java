@@ -37,6 +37,9 @@ public class Smartwatch {
     @Column(name = "last_ping")
     private LocalDateTime lastPing;
 
+    @Column(name = "node_id", unique = true)
+    private String nodeId;
+
     // Registros biométricos generados por este dispositivo
     @OneToMany(mappedBy = "deviceId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BiometricRecord> biometricRecords;

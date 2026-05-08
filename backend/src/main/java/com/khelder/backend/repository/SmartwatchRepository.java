@@ -22,6 +22,8 @@ public interface SmartwatchRepository extends JpaRepository<Smartwatch, String> 
     // Todos los smartwatches de un paciente (historial de dispositivos)
     List<Smartwatch> findAllByPatientPatientId(UUID patientId);
 
+    Optional<Smartwatch> findByNodeId(String nodeId);
+
     // Actualizar último ping — RF-15 monitorización de conexión
     @Modifying
     @Transactional
