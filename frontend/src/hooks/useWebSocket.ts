@@ -6,12 +6,6 @@ import type { AlertNotification, VitalsNotification } from '../types';
 interface UseWebSocketOptions {
   caregiverId: string;
   onAlert:     (alert: AlertNotification) => void;
-  enabled:     boolean;
-}
-
-interface UseWebSocketOptions {
-  caregiverId: string;
-  onAlert:     (alert: AlertNotification) => void;
   onVitals?:   (vitals: VitalsNotification) => void;
   enabled:     boolean;
 }
@@ -34,26 +28,19 @@ export const useWebSocket = ({
         stompClient.subscribe(`/topic/alerts/${caregiverId}`, (message) => {
           const raw = JSON.parse(message.body);
           const alert: AlertNotification = {
-            alertId:     raw.alert_id,
-            deviceId:    raw.device_id,
-            patientId:   raw.patient_id,
-            patientName: raw.patient_name,
-            alertType:   raw.alert_type,
-            status:      raw.status,
-            latitude:    raw.latitude,
-            longitude:   raw.longitude,
-            heartRate:   raw.heart_rate,
+            alertId:      raw.alert_id,
+            deviceId:     raw.device_id,
+            patientId:    raw.patient_id,
+            patientName:  raw.patient_name,
+            alertType:    raw.alert_type,
+            status:       raw.status,
+            latitude:     raw.latitude,
+            longitude:    raw.longitude,
+            heartRate:    raw.heart_rate,
             batteryLevel: raw.battery_level,
-            timestamp:   raw.timestamp,
+            timestamp:    raw.timestamp,
           };
           onAlert(alert);
-        });
-
-        // Suscripción al topic de estado de conexión
-        stompClient.subscribe('/topic/connection', (message) => {
-          const status = JSON.parse(message.body);
-          console.log('Estado conexión:', status);
-          // El refresco periódico de 30s actualizará el estado automáticamente
         });
 
         stompClient.subscribe(`/topic/vitals/${caregiverId}`, (message) => {
@@ -68,7 +55,10 @@ export const useWebSocket = ({
           });
         });
 
-        
+        stompClient.subscribe('/topic/connection', (message) => {
+          const status = JSON.parse(message.body);
+          console.log('Estado conexión:', status);
+        });
       },
       onDisconnect: () => {
         console.log('WebSocket desconectado');
@@ -77,7 +67,7 @@ export const useWebSocket = ({
 
     stompClient.activate();
     clientRef.current = stompClient;
-  }, [caregiverId, onAlert]);
+  }, [caregiverId, onAlert, onVitals]);  // ← añadir onVitals
 
   useEffect(() => {
     if (!enabled) return;

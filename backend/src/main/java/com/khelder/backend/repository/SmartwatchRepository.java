@@ -47,4 +47,9 @@ public interface SmartwatchRepository extends JpaRepository<Smartwatch, String> 
         OR s.lastPing IS NULL
         """)
     List<Smartwatch> findDisconnected(@Param("threshold") LocalDateTime threshold);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Smartwatch s SET s.fcmToken = :fcmToken WHERE s.nodeId = :nodeId")
+    void updateFcmToken(@Param("nodeId") String nodeId, @Param("fcmToken") String fcmToken);
 }

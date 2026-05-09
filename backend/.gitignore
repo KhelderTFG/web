@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Firebase service account key (if accidentally committed) ###
+khelder-firebase-adminsdk-fbsvc-b832874b63.json

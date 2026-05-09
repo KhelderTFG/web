@@ -5,6 +5,7 @@ import com.khelder.backend.dto.auth.PairingStatusResponse;
 import com.khelder.backend.dto.auth.RegisterDeviceRequest;
 import com.khelder.backend.entity.Caregiver;
 import com.khelder.backend.repository.CaregiverRepository;
+import com.khelder.backend.repository.SmartwatchRepository;
 import com.khelder.backend.service.PairingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -22,6 +24,7 @@ public class PairingController {
 
     private final PairingService    pairingService;
     private final CaregiverRepository caregiverRepository;
+    private final SmartwatchRepository smartwatchRepository;
 
     /**
      * El móvil registra el código del Watch.
@@ -64,5 +67,18 @@ public class PairingController {
     ) {
         PairingStatusResponse response = pairingService.checkStatus(code);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/fcm-token")
+    public ResponseEntity<Void> registerFcmToken(
+            @RequestHeader("X-Device-Id") String nodeId,
+            @RequestBody Map<String, String> body
+    ) {
+        String fcmToken = body.get("fcm_token");
+        if (fcmToken != null && !fcmToken.isBlank()) {
+            smartwatchRepository.updateFcmToken(nodeId, fcmToken);
+            // log.info("FCM token registrado para nodeId: {}", nodeId);
+        }
+        return ResponseEntity.ok().build();
     }
 }

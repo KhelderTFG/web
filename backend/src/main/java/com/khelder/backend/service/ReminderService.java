@@ -9,6 +9,8 @@ import com.khelder.backend.entity.Reminder;
 import com.khelder.backend.repository.CaregiverRepository;
 import com.khelder.backend.repository.PatientRepository;
 import com.khelder.backend.repository.ReminderRepository;
+import com.khelder.backend.repository.SmartwatchRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +29,8 @@ public class ReminderService {
     private final ReminderRepository  reminderRepository;
     private final PatientRepository   patientRepository;
     private final CaregiverRepository caregiverRepository;
+    private final FcmService         fcmService;
+    private final SmartwatchRepository smartwatchRepository;
 
     // -------------------------------------------------------------------------
     // RF-10: Crear recordatorio
@@ -63,6 +67,24 @@ public class ReminderService {
 
         log.info("Recordatorio creado: {} para paciente {}",
                 saved.getReminderId(), request.getPatientId());
+
+        // Buscar el smartwatch del paciente y enviar via FCM
+        smartwatchRepository.findByPatientPatientId(request.getPatientId())
+                .ifPresent(sw -> {
+                    if (sw.getFcmToken() != null) {
+                        long scheduledAtMs = saved.getScheduledDate()
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toInstant()
+                                .toEpochMilli();
+                        fcmService.sendReminderToDevice(
+                                sw.getFcmToken(),
+                                saved.getReminderId().toString(),
+                                saved.getMessage(),
+                                "",
+                                scheduledAtMs
+                        );
+                    }
+                });
 
         return toResponse(saved);
     }

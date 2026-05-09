@@ -43,6 +43,7 @@ public class SecurityConfig {
                     "/api/v1/auth/**",
                     "/api/v1/pairing/register",
                     "/api/v1/pairing/status/**",
+                    "/api/v1/pairing/fcm-token",
                     "/ws/**",
                     "/ws-test.html",
                     "/error").permitAll()

@@ -145,12 +145,6 @@ const DashboardPage = () => {
   }
 }, [selected]);
 
-  useWebSocket({
-    caregiverId: caregiver?.caregiverId ?? '',
-    onAlert:     handleNewAlert,
-    enabled:     !!caregiver,
-  });
-
   const handleAlertResolved = (alertId: string) => {
     setAlerts((prev) => prev.filter((a) => a.alertId !== alertId));
   };
