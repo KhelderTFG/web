@@ -4,13 +4,19 @@ import com.khelder.backend.dto.biometric.BiometricHistoryResponse;
 import com.khelder.backend.dto.biometric.BiometricRecordRequest;
 import com.khelder.backend.dto.biometric.BiometricRecordResponse;
 import com.khelder.backend.entity.BiometricRecord;
+import com.khelder.backend.entity.GpsLocation;
 import com.khelder.backend.entity.Smartwatch;
 import com.khelder.backend.repository.BiometricRecordRepository;
 import com.khelder.backend.repository.CaregiverRepository;
+import com.khelder.backend.repository.GpsLocationRepository;
 import com.khelder.backend.repository.PatientRepository;
 import com.khelder.backend.repository.SmartwatchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +38,8 @@ public class BiometricRecordService {
     private final SmartwatchRepository      smartwatchRepository;
     private final PatientRepository         patientRepository;
     private final CaregiverRepository       caregiverRepository;
+    private final GpsLocationRepository        gpsLocationRepository;
+    private final SafeZoneService safeZoneService;
     private final AlertService              alertService;
     private final WebSocketNotificationService webSocketNotificationService;
 
@@ -60,38 +68,74 @@ public class BiometricRecordService {
                 ZoneId.systemDefault()
         );
 
-        // Crear y guardar el registro
-        BiometricRecord record = BiometricRecord.builder()
-                .deviceId(smartwatch.getDeviceId())
-                .heartRate(request.getHeartRate())
-                .spO2(request.getSpO2())
-                .steps(request.getSteps())
-                .temperature(request.getTemperature())
-                .timestamp(timestamp)
-                .build();
+        // Comprobar geofence si hay coordenadas
+        if (request.getLatitude() != null && request.getLongitude() != null) {
+                log.debug("Comprobando geofence para dispositivo {} — lat: {}, lon: {}",
+                        smartwatch.getDeviceId(), request.getLatitude(), request.getLongitude());
 
-        BiometricRecord saved = biometricRecordRepository.save(record);
-        webSocketNotificationService.notifyVitals(saved);
+                GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+                Point point = geometryFactory.createPoint(
+                        new org.locationtech.jts.geom.Coordinate(
+                                request.getLongitude(), // X = longitud
+                                request.getLatitude()   // Y = latitud
+                        )
+                );
 
-        // Actualizar último ping del smartwatch
-        smartwatchRepository.updatePing(
-                smartwatch.getDeviceId(),
-                LocalDateTime.now(),
-                request.getBatteryLevel()
-        );
+                GpsLocation gpsLocation = GpsLocation.builder()
+                        .deviceId(smartwatch.getDeviceId())
+                        .coordinates(point)
+                        .build();
+                gpsLocationRepository.save(gpsLocation);
 
-        // Evaluar umbrales clínicos
-        checkThresholds(request);
+                webSocketNotificationService.notifyLocation(
+                        smartwatch.getDeviceId(),
+                        smartwatch.getPatient().getPatientId(),
+                        request.getLatitude(),
+                        request.getLongitude()
+                );
+                }
 
-        log.debug("Registro biométrico guardado: {} para dispositivo {}",
-                saved.getRecordId(), request.getDeviceId());
+                safeZoneService.checkGeofence(
+                        smartwatch.getDeviceId(),
+                        request.getLatitude(),
+                        request.getLongitude()
+                );
 
-        return BiometricRecordResponse.builder()
-                .recordId(saved.getRecordId())
-                .status("OK")
-                .message("Registro guardado correctamente")
-                .build();
-    }
+                // Crear y guardar el registro
+                BiometricRecord record = BiometricRecord.builder()
+                        .deviceId(smartwatch.getDeviceId())
+                        .heartRate(request.getHeartRate())
+                        .spO2(request.getSpO2())
+                        .steps(request.getSteps())
+                        .temperature(request.getTemperature())
+                        .timestamp(timestamp)
+                        .build();
+
+                BiometricRecord saved = biometricRecordRepository.save(record);
+                webSocketNotificationService.notifyVitals(saved);
+
+                // Actualizar último ping del smartwatch
+                smartwatchRepository.updatePing(
+                        smartwatch.getDeviceId(),
+                        LocalDateTime.now(),
+                        request.getBatteryLevel()
+                );
+
+                // Evaluar umbrales clínicos
+                checkThresholds(request);
+
+                log.debug("Registro biométrico guardado: {} para dispositivo {}",
+                        saved.getRecordId(), request.getDeviceId());
+
+                return BiometricRecordResponse.builder()
+                        .recordId(saved.getRecordId())
+                        .status("OK")
+                        .message("Registro guardado correctamente")
+                        .build();
+        }
+
+        
+    
 
     // -------------------------------------------------------------------------
     // RF-03: Guardar lote de registros pendientes de sincronización

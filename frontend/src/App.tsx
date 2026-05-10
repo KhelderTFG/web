@@ -12,6 +12,7 @@ import AlertsPage       from './pages/AlertsPage';
 import RemindersPage    from './pages/RemindersPage';
 import ReportsPage      from './pages/ReportsPage';
 import SmartWatchPairingPage from './pages/SmartwatchPairingPage';
+import RegisterPage from './pages/RegisterPage';
 
 // Ruta protegida
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -47,6 +48,8 @@ const AppRoutes = () => (
     <Route path="*" element={<Navigate to="/" replace />
     } />
     <Route path="/pairing" element={<SmartWatchPairingPage />
+    } />
+    <Route path="/register" element={<RegisterPage />
     } />
   </Routes>
 );

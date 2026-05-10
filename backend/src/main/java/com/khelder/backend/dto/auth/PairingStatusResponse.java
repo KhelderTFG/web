@@ -13,4 +13,5 @@ public class PairingStatusResponse {
     private String  status;   // "PENDING" | "APPROVED"
     private String  token;    // solo si APPROVED
     private String  deviceId; // solo si APPROVED
+    private String patientId;
 }

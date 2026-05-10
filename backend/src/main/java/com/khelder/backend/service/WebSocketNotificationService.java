@@ -118,4 +118,21 @@ public class WebSocketNotificationService {
                         messagingTemplate.convertAndSend(topic, payload);
                 });
         }
+
+        public void notifyLocation(String deviceId, UUID patientId, double latitude, double longitude) {
+                var payload = java.util.Map.of(
+                        "device_id",  deviceId,
+                        "patient_id", patientId.toString(),
+                        "latitude",   latitude,
+                        "longitude",  longitude,
+                        "timestamp",  java.time.LocalDateTime.now().toString()
+                );
+
+                caregiverPatientRepository
+                        .findByIdPatientId(patientId)
+                        .forEach(cp -> {
+                                String topic = "/topic/location/" + cp.getCaregiver().getCaregiverId();
+                                messagingTemplate.convertAndSend(topic, payload);
+                        });
+        }
 }

@@ -18,6 +18,7 @@ import type {
   SafeZoneResponse,
   SmartwatchResponse,
   VitalsNotification,
+  LocationNotification,
 } from '../types';
 import { MapPin, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -163,6 +164,23 @@ const DashboardPage = () => {
       setRecords((prev) => [newRecord, ...prev].slice(0, 10));
     }
   }, [selected]);
+
+  const handleNewLocation = useCallback((location: LocationNotification) => {
+      if (selected && location.patientId === selected.patientId) {
+        setLastLocation({
+          latitude:  location.latitude,
+          longitude: location.longitude,
+        });
+      }
+    }, [selected]);
+
+    useWebSocket({
+      caregiverId: caregiver?.caregiverId ?? '',
+      onAlert:     handleNewAlert,
+      onVitals:    handleNewVitals,
+      onLocation:  handleNewLocation,
+      enabled:     !!caregiver,
+    });
 
   useWebSocket({
     caregiverId: caregiver?.caregiverId ?? '',

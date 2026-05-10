@@ -34,7 +34,7 @@ const HeartRateChart = ({ records }: Props) => {
         <YAxis tick={{ fontSize: 10 }} domain={[30, 160]} />
         <Tooltip
           contentStyle={{ fontSize: 12, borderRadius: 8 }}
-          formatter={(value: number, name: string) => [
+          formatter={(value, name) => [
             `${value} ${name === 'fc' ? 'bpm' : '%'}`,
             name === 'fc' ? 'FC' : 'SpO2',
           ]}

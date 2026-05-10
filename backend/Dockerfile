@@ -7,7 +7,7 @@ COPY src ./src
 RUN mvn package -DskipTests
 
 # Fase 2: imagen de producción ligera
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080

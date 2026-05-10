@@ -5,25 +5,42 @@ import { authApi } from '../api/auth';
 import Button from '../components/ui/Button';
 import Input  from '../components/ui/Input';
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({
+    name:     '',
+    email:    '',
+    password: '',
+    phone:    '',
+  });
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
+    if (form.password !== confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+
+    if (form.password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
+    setLoading(true);
     try {
-      const { data } = await authApi.login(form);
+      const { data } = await authApi.register(form);
       login(data);
       navigate('/');
-    } catch {
-      setError('Email o contraseña incorrectos');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      setError(msg ?? 'Error al crear la cuenta. Inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -49,13 +66,23 @@ const LoginPage = () => {
           </p>
         </div>
 
-        {/* Tarjeta de login */}
+        {/* Tarjeta de registro */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <h2 className="text-xl font-semibold text-[#2C3E50] mb-6">
-            Iniciar sesión
+            Crear cuenta
           </h2>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <Input
+              label="Nombre completo"
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Carlos Martínez"
+              required
+              autoComplete="name"
+            />
+
             <Input
               label="Correo electrónico"
               type="email"
@@ -67,13 +94,32 @@ const LoginPage = () => {
             />
 
             <Input
+              label="Teléfono"
+              type="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              placeholder="600 123 456"
+              autoComplete="tel"
+            />
+
+            <Input
               label="Contraseña"
               type="password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
+              placeholder="Mínimo 8 caracteres"
+              required
+              autoComplete="new-password"
+            />
+
+            <Input
+              label="Confirmar contraseña"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
               required
-              autoComplete="current-password"
+              autoComplete="new-password"
             />
 
             {error && (
@@ -88,18 +134,18 @@ const LoginPage = () => {
               loading={loading}
               className="w-full mt-2 py-3"
             >
-              Entrar
+              Crear cuenta
             </Button>
           </form>
 
           <p className="text-center text-sm text-[#7F8C8D] mt-6">
-            ¿No tienes cuenta?{' '}
+            ¿Ya tienes cuenta?{' '}
             <Link
-              to="/register"
+              to="/login"
               className="text-[#1A8C7A] font-medium hover:text-[#126B5E]
                          transition-colors"
             >
-              Crear cuenta
+              Iniciar sesión
             </Link>
           </p>
         </div>
@@ -108,4 +154,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

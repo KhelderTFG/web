@@ -32,8 +32,20 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET:                 ${JWT_SECRET}
       JWT_EXPIRATION:             ${JWT_EXPIRATION}
+      FIREBASE_CREDENTIALS_BASE64: ${FIREBASE_CREDENTIALS_BASE64}
     ports:
       - "${SPRING_PORT}:8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: khelder_frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
     restart: unless-stopped
 
 volumes:

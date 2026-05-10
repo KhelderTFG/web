@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import {
-  LineChart, Line, AreaChart, Area,
+  AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, ReferenceLine, Legend,
+  ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 import { biometricApi } from '../../api/biometric';
 import type { BiometricHistoryResponse } from '../../types';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface Props {
   patientId: string;
-  deviceId:  string;
+  deviceId?:  string;
 }
 
 type Range = '24h' | '7d' | '30d';
@@ -22,7 +22,7 @@ const RANGES: { label: string; value: Range }[] = [
   { label: 'Últimos 30 días', value: '30d' },
 ];
 
-const BiometricHistory = ({ patientId, deviceId }: Props) => {
+const BiometricHistory = ({ patientId }: Props) => {
   const [records,  setRecords]  = useState<BiometricHistoryResponse[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [range,    setRange]    = useState<Range>('24h');
@@ -156,7 +156,7 @@ const BiometricHistory = ({ patientId, deviceId }: Props) => {
                        interval="preserveStartEnd" />
                 <YAxis tick={{ fontSize: 10 }} domain={[30, 160]} />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }}
-                  formatter={(v: number) => [`${v} bpm`, 'FC']} />
+                  formatter={(v) => [`${v} bpm`, 'FC']} />
                 <ReferenceLine y={140} stroke="#CC2222" strokeDasharray="3 3" />
                 <ReferenceLine y={45}  stroke="#CC2222" strokeDasharray="3 3" />
                 <Area type="monotone" dataKey="fc" stroke="#1A8C7A"
@@ -185,7 +185,7 @@ const BiometricHistory = ({ patientId, deviceId }: Props) => {
                        interval="preserveStartEnd" />
                 <YAxis tick={{ fontSize: 10 }} domain={[85, 100]} />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }}
-                  formatter={(v: number) => [`${v}%`, 'SpO2']} />
+                  formatter={(v) => [`${v}%`, 'SpO2']} />
                 <ReferenceLine y={90} stroke="#CC2222" strokeDasharray="3 3" />
                 <Area type="monotone" dataKey="spo2" stroke="#2AB5A0"
                       fill="url(#spo2Grad)" strokeWidth={2}
@@ -213,7 +213,7 @@ const BiometricHistory = ({ patientId, deviceId }: Props) => {
                        interval="preserveStartEnd" />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }}
-                  formatter={(v: number) => [v.toLocaleString('es-ES'), 'Pasos']} />
+                  formatter={(v) => [(v as number).toLocaleString('es-ES'), 'Pasos']}/>
                 <Area type="monotone" dataKey="pasos" stroke="#E67E22"
                       fill="url(#pasosGrad)" strokeWidth={2}
                       dot={false} connectNulls />

@@ -1,12 +1,13 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import type { AlertNotification, VitalsNotification } from '../types';
+import type { AlertNotification, LocationNotification, VitalsNotification } from '../types';
 
 interface UseWebSocketOptions {
   caregiverId: string;
   onAlert:     (alert: AlertNotification) => void;
   onVitals?:   (vitals: VitalsNotification) => void;
+  onLocation?: (location: LocationNotification) => void;
   enabled:     boolean;
 }
 
@@ -14,6 +15,7 @@ export const useWebSocket = ({
   caregiverId,
   onAlert,
   onVitals,
+  onLocation,
   enabled,
 }: UseWebSocketOptions) => {
   const clientRef = useRef<Client | null>(null);
@@ -43,6 +45,16 @@ export const useWebSocket = ({
           onAlert(alert);
         });
 
+        stompClient.subscribe(`/topic/location/${caregiverId}`, (message) => {
+            const raw = JSON.parse(message.body);
+            onLocation?.({
+                deviceId:  raw.device_id,
+                patientId: raw.patient_id,
+                latitude:  raw.latitude,
+                longitude: raw.longitude,
+            });
+        });
+
         stompClient.subscribe(`/topic/vitals/${caregiverId}`, (message) => {
           const raw = JSON.parse(message.body);
           onVitals?.({
@@ -67,7 +79,7 @@ export const useWebSocket = ({
 
     stompClient.activate();
     clientRef.current = stompClient;
-  }, [caregiverId, onAlert, onVitals]);  // ← añadir onVitals
+  }, [caregiverId, onAlert, onVitals, onLocation]);
 
   useEffect(() => {
     if (!enabled) return;

@@ -140,9 +140,9 @@ public class SafeZoneService {
     public void checkGeofence(String deviceId, double latitude, double longitude) {
 
         // Obtener el paciente del dispositivo
-        Smartwatch smartwatch = smartwatchRepository
-                .findById(deviceId)
-                .orElse(null);
+        Smartwatch smartwatch = smartwatchRepository.findById(deviceId)
+        .orElseGet(() -> smartwatchRepository.findByNodeId(deviceId)
+                .orElse(null));
 
         if (smartwatch == null) return;
 

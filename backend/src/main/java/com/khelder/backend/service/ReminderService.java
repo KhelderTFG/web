@@ -214,7 +214,6 @@ public class ReminderService {
 
         log.info("Recordatorio confirmado: {}", reminderId);
 
-        // TODO Issue #32: notificar al panel web via WebSocket
     }
 
     // -------------------------------------------------------------------------

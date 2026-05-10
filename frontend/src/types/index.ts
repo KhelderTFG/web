@@ -158,3 +158,10 @@ export interface VitalsNotification {
   steps:     number;
   timestamp: string;
 }
+
+export interface LocationNotification {
+  deviceId:  string;
+  patientId: string;
+  latitude:  number;
+  longitude: number;
+}
