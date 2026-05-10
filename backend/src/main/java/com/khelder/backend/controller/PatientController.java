@@ -104,4 +104,10 @@ public class PatientController {
         patientService.deletePatient(patientId);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{patientId}/device")
+    public ResponseEntity<Void> removeDevice(@PathVariable UUID patientId) {
+        patientService.removeDevice(patientId);
+        return ResponseEntity.noContent().build();
+    }
 }

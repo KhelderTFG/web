@@ -59,4 +59,6 @@ public interface SafeZoneRepository extends JpaRepository<SafeZone, UUID> {
         @Param("latitude")   double latitude,
         @Param("longitude")  double longitude
     );
+
+    void deleteByPatientPatientId(UUID patientId);
 }

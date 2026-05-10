@@ -293,4 +293,12 @@ public class AlertService {
 
                 webSocketNotificationService.notifyAlert(alert);
         }
+
+        @Transactional
+        public void resolveAllByDevice(String deviceId) {
+        Smartwatch smartwatch = smartwatchRepository.findById(deviceId)
+                .orElseGet(() -> smartwatchRepository.findByNodeId(deviceId)
+                        .orElseThrow());
+        alertRepository.resolveAllByDeviceId(smartwatch.getDeviceId());
+        }
 }

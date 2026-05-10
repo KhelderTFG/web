@@ -91,14 +91,19 @@ public class AlertController {
         );
     }
 
-    /**
-     * RF-12: Cancelar una alerta
-     * PUT /api/v1/alerts/{alertId}/cancel
-     */
-    @PutMapping("/{alertId}/cancel")
-    public ResponseEntity<AlertResponse> cancelAlert(
-            @PathVariable UUID alertId
-    ) {
-        return ResponseEntity.ok(alertService.cancelAlert(alertId));
-    }
+        /**
+         * RF-12: Cancelar una alerta
+         * PUT /api/v1/alerts/{alertId}/cancel
+         */
+        @PutMapping("/{alertId}/cancel")
+        public ResponseEntity<AlertResponse> cancelAlert(
+                @PathVariable UUID alertId) {
+                return ResponseEntity.ok(alertService.cancelAlert(alertId));
+        }
+
+        @PutMapping("/device/{deviceId}/resolve-all")
+        public ResponseEntity<Void> resolveAllByDevice(@PathVariable String deviceId) {
+                alertService.resolveAllByDevice(deviceId);
+                return ResponseEntity.ok().build();
+        }
 }

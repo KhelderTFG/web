@@ -17,4 +17,7 @@ export const alertsApi = {
 
   cancel: (alertId: string) =>
     client.put<AlertResponse>(`/alerts/${alertId}/cancel`),
+
+  resolveAllByDevice: (deviceId: string) =>
+  client.put(`/alerts/device/${deviceId}/resolve-all`),
 };

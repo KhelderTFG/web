@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { Watch } from 'lucide-react';
+import { Bell, Clock, FileText, Home, Users, Watch } from 'lucide-react';
 
 const Navbar = () => {
   const { logout, caregiver } = useAuth();
@@ -34,15 +34,34 @@ const Navbar = () => {
 
         {/* Links */}
         <div className="flex items-center gap-1">
-          <NavLink to="/"          end className={linkClass}>Inicio</NavLink>
-          <NavLink to="/patients"      className={linkClass}>Pacientes</NavLink>
-          <NavLink to="/alerts"        className={linkClass}>Alertas</NavLink>
-          <NavLink to="/reminders"     className={linkClass}>Recordatorios</NavLink>
-          <NavLink to="/reports"       className={linkClass}>Informes</NavLink>
-          <NavLink to="/pairing"       className={linkClass}>
+          <NavLink to="/" end className={linkClass}>
             <span className="flex items-center gap-1.5">
-              <Watch size={14} />
-              Vincular Watch
+              <Home size={14} /> Inicio
+            </span>
+          </NavLink>
+          <NavLink to="/patients" className={linkClass}>
+            <span className="flex items-center gap-1.5">
+              <Users size={14} /> Pacientes
+            </span>
+          </NavLink>
+          <NavLink to="/alerts" className={linkClass}>
+            <span className="flex items-center gap-1.5">
+              <Bell size={14} /> Alertas
+            </span>
+          </NavLink>
+          <NavLink to="/reminders" className={linkClass}>
+            <span className="flex items-center gap-1.5">
+              <Clock size={14} /> Recordatorios
+            </span>
+          </NavLink>
+          <NavLink to="/reports" className={linkClass}>
+            <span className="flex items-center gap-1.5">
+              <FileText size={14} /> Informes
+            </span>
+          </NavLink>
+          <NavLink to="/pairing" className={linkClass}>
+            <span className="flex items-center gap-1.5">
+              <Watch size={14} /> Vincular Watch
             </span>
           </NavLink>
         </div>

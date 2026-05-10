@@ -15,4 +15,7 @@ public interface MedicalHistoryRepository extends JpaRepository<MedicalHistory, 
 
     // Verificar si el paciente ya tiene historial médico
     boolean existsByPatientPatientId(UUID patientId);
+
+    void deleteByPatientPatientId(UUID patientId);
+
 }

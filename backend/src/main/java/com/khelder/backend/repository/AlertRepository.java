@@ -4,9 +4,11 @@ import com.khelder.backend.entity.Alert;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -65,4 +67,12 @@ public interface AlertRepository extends JpaRepository<Alert, UUID> {
         AND a.status = 'ACTIVE'
         """)
     long countActiveByCaregiverId(@Param("caregiverId") UUID caregiverId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Alert a SET a.status = 'RESOLVED' WHERE a.deviceId = :deviceId AND a.status = 'ACTIVE'")
+    void resolveAllByDeviceId(@Param("deviceId") String deviceId);
+
+    void deleteByDeviceId(String deviceId);
+
 }

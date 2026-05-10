@@ -16,6 +16,8 @@ import com.khelder.backend.repository.CaregiverPatientRepository;
 import com.khelder.backend.repository.CaregiverRepository;
 import com.khelder.backend.repository.MedicalHistoryRepository;
 import com.khelder.backend.repository.PatientRepository;
+import com.khelder.backend.repository.ReminderRepository;
+import com.khelder.backend.repository.SafeZoneRepository;
 import com.khelder.backend.repository.SmartwatchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,8 @@ public class PatientService {
     private final MedicalHistoryRepository   medicalHistoryRepository;
     private final SmartwatchRepository       smartwatchRepository;
     private final AlertRepository            alertRepository;
+    private final SafeZoneRepository       safeZoneRepository;
+    private final ReminderRepository       reminderRepository;
 
     // -------------------------------------------------------------------------
     // RF-09: Listar pacientes del cuidador autenticado
@@ -252,6 +256,24 @@ public class PatientService {
             );
         }
 
+        // Eliminar smartwatches y sus datos asociados
+        smartwatchRepository.findByPatientPatientId(patientId).ifPresent(sw -> {
+            alertRepository.deleteByDeviceId(sw.getDeviceId());
+            smartwatchRepository.delete(sw);
+        });
+
+        // Eliminar zonas seguras
+        safeZoneRepository.deleteByPatientPatientId(patientId);
+
+        // Eliminar recordatorios
+        reminderRepository.deleteByPatientPatientId(patientId);
+
+        // Eliminar asignaciones cuidador-paciente
+        caregiverPatientRepository.deleteByIdPatientId(patientId);
+
+        // Eliminar historial médico
+        medicalHistoryRepository.deleteByPatientPatientId(patientId);
+
         patientRepository.deleteById(patientId);
         log.info("Paciente eliminado: {}", patientId);
     }
@@ -305,5 +327,19 @@ public class PatientService {
     private Integer calculateAge(LocalDate dateOfBirth) {
         if (dateOfBirth == null) return null;
         return Period.between(dateOfBirth, LocalDate.now()).getYears();
+    }
+
+    @Transactional
+    public void removeDevice(UUID patientId) {
+        UUID caregiverId = getAuthenticatedCaregiverId();
+        if (!patientRepository.existsAssignment(caregiverId, patientId)) {
+            throw new SecurityException("No tienes permisos");
+        }
+        smartwatchRepository.findByPatientPatientId(patientId).ifPresent(sw -> {
+            alertRepository.deleteByDeviceId(sw.getDeviceId());
+            safeZoneRepository.deleteByPatientPatientId(patientId);
+            smartwatchRepository.delete(sw);
+        });
+        log.info("Smartwatch eliminado para paciente: {}", patientId);
     }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Layout from '../components/layout/Layout';
 import PatientMap     from '../components/dashboard/PatientMap';
 import DeviceStatus   from '../components/dashboard/DeviceStatus';
@@ -20,7 +20,7 @@ import type {
   VitalsNotification,
   LocationNotification,
 } from '../types';
-import { MapPin, Plus } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ConnectionStatus   from '../components/dashboard/ConnectionStatus';
 import { smartwatchesApi } from '../api/smartwatches';
@@ -105,6 +105,7 @@ const DashboardPage = () => {
 
   useEffect(() => {
     const fetchDevices = () => {
+      console.log('Refrescando dispositivos...');
       smartwatchesApi.getMyDevices()
         .then(({ data }) => setDevices(data))
         .catch(() => {});
@@ -121,37 +122,39 @@ const DashboardPage = () => {
     if (patient) setSelected(patient);
   };
 
-  const handleNewAlert = useCallback((alert: AlertResponse) => {
-  // Actualizar contador de alertas en la lista de pacientes
-  setPatients((prev) => prev.map((p) => {
-    if (p.patientId !== alert.patientId) return p;
-    if (alert.status === 'ACTIVE') {
-      return { ...p, activeAlertsCount: p.activeAlertsCount + 1 };
-    } else {
-      return { ...p, activeAlertsCount: Math.max(0, p.activeAlertsCount - 1) };
-    }
-  }));
+  const selectedRef = useRef(selected);
+  useEffect(() => { selectedRef.current = selected; }, [selected]);
 
-  // Actualizar alertas del paciente seleccionado
-  if (selected && alert.patientId === selected.patientId) {
-    if (alert.status === 'ACTIVE') {
-      setAlerts((prev) => {
-        const exists = prev.find(a => a.alertId === alert.alertId);
-        if (exists) return prev;
-        return [alert, ...prev];
-      });
-    } else {
-      setAlerts((prev) => prev.filter(a => a.alertId !== alert.alertId));
+  const handleNewAlert = useCallback((alert: AlertResponse) => {
+    const sel = selectedRef.current;
+    setPatients((prev) => prev.map((p) => {
+      if (p.patientId !== alert.patientId) return p;
+      if (alert.status === 'ACTIVE') {
+        return { ...p, activeAlertsCount: p.activeAlertsCount + 1 };
+      } else {
+        return { ...p, activeAlertsCount: Math.max(0, p.activeAlertsCount - 1) };
+      }
+    }));
+    if (sel && alert.patientId === sel.patientId) {
+      if (alert.status === 'ACTIVE') {
+        setAlerts((prev) => {
+          const exists = prev.find(a => a.alertId === alert.alertId);
+          if (exists) return prev;
+          return [alert, ...prev];
+        });
+      } else {
+        setAlerts((prev) => prev.filter(a => a.alertId !== alert.alertId));
+      }
     }
-  }
-}, [selected]);
+  }, []);
 
   const handleAlertResolved = (alertId: string) => {
     setAlerts((prev) => prev.filter((a) => a.alertId !== alertId));
   };
 
   const handleNewVitals = useCallback((vitals: VitalsNotification) => {
-    if (selected && vitals.patientId === selected.patientId) {
+    const sel = selectedRef.current;
+    if (sel && vitals.patientId === sel.patientId) {
       const newRecord: BiometricHistoryResponse = {
         recordId:    crypto.randomUUID(),
         deviceId:    vitals.deviceId,
@@ -163,29 +166,23 @@ const DashboardPage = () => {
       };
       setRecords((prev) => [newRecord, ...prev].slice(0, 10));
     }
-  }, [selected]);
+  }, []);
 
   const handleNewLocation = useCallback((location: LocationNotification) => {
-      if (selected && location.patientId === selected.patientId) {
-        setLastLocation({
-          latitude:  location.latitude,
-          longitude: location.longitude,
-        });
-      }
-    }, [selected]);
-
-    useWebSocket({
-      caregiverId: caregiver?.caregiverId ?? '',
-      onAlert:     handleNewAlert,
-      onVitals:    handleNewVitals,
-      onLocation:  handleNewLocation,
-      enabled:     !!caregiver,
-    });
+    const sel = selectedRef.current;
+    if (sel && location.patientId === sel.patientId) {
+      setLastLocation({
+        latitude:  location.latitude,
+        longitude: location.longitude,
+      });
+    }
+  }, []);
 
   useWebSocket({
     caregiverId: caregiver?.caregiverId ?? '',
     onAlert:     handleNewAlert,
     onVitals:    handleNewVitals,
+    onLocation:  handleNewLocation,
     enabled:     !!caregiver,
   });
 
@@ -261,11 +258,30 @@ const DashboardPage = () => {
 
             {/* Alertas pendientes */}
             <div>
-              <h2 className="text-sm font-semibold text-[#7F8C8D] uppercase
-                             tracking-wide mb-3">
-                Alertas pendientes
-              </h2>
-              <div className="bg-white border border-gray-200 rounded-xl px-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold text-[#7F8C8D] uppercase tracking-wide">
+                  Alertas pendientes
+                </h2>
+                {alerts.length > 0 && selected?.activeDeviceId && (
+                  <button
+                    onClick={async () => {
+                      await alertsApi.resolveAllByDevice(selected.activeDeviceId!);
+                      setAlerts([]);
+                      setPatients(prev => prev.map(p =>
+                        p.patientId === selected.patientId
+                          ? { ...p, activeAlertsCount: 0 }
+                          : p
+                      ));
+                    }}
+                    className="text-xs text-[#CC2222] hover:text-red-700 font-medium
+                              transition-colors"
+                  >
+                    Resolver todas
+                  </button>
+                )}
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl px-4
+                              max-h-64 overflow-y-auto">
                 {alerts.length === 0 ? (
                   <p className="text-sm text-[#7F8C8D] py-4 text-center">
                     Sin alertas activas ✓

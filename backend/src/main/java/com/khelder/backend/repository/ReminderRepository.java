@@ -54,4 +54,6 @@ public interface ReminderRepository extends JpaRepository<Reminder, UUID> {
 
     List<Reminder> findByCaregiverCaregiverIdOrderByScheduledDateAsc(UUID caregiverId);
 
+    void deleteByPatientPatientId(UUID patientId);
+
 }

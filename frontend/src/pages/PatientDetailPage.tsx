@@ -225,9 +225,7 @@ const PatientDetailPage = () => {
                   <div className="space-y-1 text-sm">
                     <p className="text-[#2C3E50]">
                       <span className="text-[#7F8C8D]">ID: </span>
-                      <span className="font-mono text-xs">
-                        {patient.activeDeviceId}
-                      </span>
+                      <span className="font-mono text-xs">{patient.activeDeviceId}</span>
                     </p>
                     <p className="text-[#2C3E50]">
                       <span className="text-[#7F8C8D]">Batería: </span>
@@ -237,11 +235,22 @@ const PatientDetailPage = () => {
                       ? 'text-[#1A8C7A]' : 'text-[#CC2222]'}>
                       {patient.deviceConnected ? '● Conectado' : '● Desconectado'}
                     </p>
+                    <button
+                      onClick={async () => {
+                        if (!confirm('¿Eliminar el smartwatch? Se borrarán alertas y zonas seguras.')) return;
+                        await patientsApi.removeDevice(id!);
+                        setPatient(prev => prev ? { ...prev, activeDeviceId: undefined } : prev);
+                        setSuccess('Smartwatch eliminado correctamente');
+                      }}
+                      className="mt-2 flex items-center gap-1.5 text-xs text-[#CC2222]
+                                hover:text-red-700 font-medium transition-colors"
+                    >
+                      <Trash2 size={12} />
+                      Desvincular smartwatch
+                    </button>
                   </div>
                 ) : (
-                  <p className="text-sm text-[#7F8C8D]">
-                    Sin dispositivo asignado
-                  </p>
+                  <p className="text-sm text-[#7F8C8D]">Sin dispositivo asignado</p>
                 )}
               </div>
             )}

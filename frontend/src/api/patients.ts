@@ -24,4 +24,7 @@ export const patientsApi = {
 
   delete: (id: string) =>
     client.delete(`/patients/${id}`),
+
+  removeDevice: (patientId: string) =>
+    client.delete(`/patients/${patientId}/device`),
 };

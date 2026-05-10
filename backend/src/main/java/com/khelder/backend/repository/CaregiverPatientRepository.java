@@ -23,4 +23,7 @@ public interface CaregiverPatientRepository
 
     // Verificar si existe la asignación
     boolean existsByIdCaregiverIdAndIdPatientId(UUID caregiverId, UUID patientId);
+
+    void deleteByIdPatientId(UUID patientId);
+
 }
