@@ -133,7 +133,7 @@ const SafeZonePage = () => {
       {/* Cabecera */}
       <div className="flex items-center gap-3 mb-6">
         <button
-          onClick={() => navigate(`/patients/${patientId}`)}
+          onClick={() => navigate(`/`)}
           className="p-2 hover:bg-gray-100 rounded-lg transition-all"
         >
           <ArrowLeft size={20} className="text-[#2C3E50]" />
